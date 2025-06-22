@@ -20,6 +20,61 @@ No* novoNo(char palavra[20]) {
     no->dir = NULL;
     return no;
 }
+
+No* rotacaoEsquerda(No* arvore) {
+    No* aux = arvore->dir;
+    arvore->dir = aux->esq;
+    aux->esq = arvore;
+    return aux;
+}
+No* rotacaoDireita(No* arvore) {
+    No* aux = arvore->esq;
+    arvore->esq = aux->dir;
+    aux->dir = arvore;
+    return aux;
+}
+No* rotacaoDuplaEsquerda(No* arvore) {
+    rotacaoDireita(arvore->dir);
+    rotacaoEsquerda(arvore);
+    return arvore;
+}
+No* rotacaoDuplaDireita(No* arvore) {
+    rotacaoEsquerda(arvore->esq);
+    rotacaoDireita(arvore);
+    return arvore;
+}
+
+int altura(No* arvore) {
+    if (arvore == NULL) return 0;
+    int he = altura(arvore->esq);
+    int hd = altura(arvore->dir);
+    return (he > hd ? he : hd) + 1;
+}
+
+No* balancearAVL(No* arvore) {
+    if (!arvore) return NULL;
+
+    int fb = altura(arvore->esq) - altura(arvore->dir);
+
+    if (fb > 1) {
+        int fbe = altura(arvore->esq->esq) - altura(arvore->esq->dir);
+        if (fbe >= 0)
+            return rotacaoDireita(arvore);
+        else
+            return rotacaoDuplaDireita(arvore);
+    }
+
+    if (fb < -1) {
+        int fbd = altura(arvore->dir->esq) - altura(arvore->dir->dir);
+        if (fbd <= 0)
+            return rotacaoEsquerda(arvore);
+        else
+            return rotacaoDuplaEsquerda(arvore);
+    }
+
+    return arvore;
+}
+
  // --------------------------------------------------------------------------------
  //ESQUERDA
 void posOrdemE(No* a){
@@ -235,7 +290,7 @@ No* insereFolha(No* arvore, char palavra[20]) {
     }
 
     printf("Palavra '%s' inserida na arvore.\n", palavra);
-    return arvore;
+    return balancearAVL(arvore);
 }
 
 No* removeFolha(No* arvore, char palavra[20]) {
@@ -243,23 +298,32 @@ No* removeFolha(No* arvore, char palavra[20]) {
 
     if (strcmp(palavra, arvore->palavra) < 0) {
         arvore->esq = removeFolha(arvore->esq, palavra);
-    } else if (strcmp(palavra, arvore->palavra) > 0) {
+    } 
+    else if (strcmp(palavra, arvore->palavra) > 0) {
         arvore->dir = removeFolha(arvore->dir, palavra);
-    } else {
-        // Nó encontrado
+    } 
+    
+    else {
+        if (arvore->repeticoes > 1) {
+            arvore->repeticoes--;
+            return arvore;
+        }
         if (arvore->esq == NULL && arvore->dir == NULL) {
             // Folha
             free(arvore);
             return NULL;
-        } else if (arvore->esq == NULL) {
+        } 
+        else if (arvore->esq == NULL) {
             No* temp = arvore->dir;
             free(arvore);
             return temp;
-        } else if (arvore->dir == NULL) {
+        } 
+        else if (arvore->dir == NULL) {
             No* temp = arvore->esq;
             free(arvore);
             return temp;
-        } else {
+        } 
+        else {
             // Dois filhos
             No* sucessor = arvore->dir;
             while (sucessor->esq != NULL) {
@@ -270,7 +334,7 @@ No* removeFolha(No* arvore, char palavra[20]) {
         }
     }
 
-    return arvore;
+    return balancearAVL(arvore);
 }
 
 int pesquisaFolha(No* arvore, char palavra[20]) {
@@ -278,14 +342,12 @@ int pesquisaFolha(No* arvore, char palavra[20]) {
 
     if (arvore != NULL) {
         cmp = strcmp(arvore->palavra, palavra);
-        if(cmp == 0) {
+        if(cmp == 0)
             return arvore->repeticoes;
-        }
-        else if (cmp > 0) {
+        else if (cmp > 0)
             return pesquisaFolha(arvore->esq, palavra);
-        } else {
+        else
             return pesquisaFolha(arvore->dir, palavra);
-        }
     }
 
     return 0;
@@ -293,9 +355,9 @@ int pesquisaFolha(No* arvore, char palavra[20]) {
 // --------------------------------------------------------------------------------
 //GERAIS
 char* strToLower(char palavra[20]) {
-    for (int i = 0; palavra[i]; i++) {
+    for (int i = 0; palavra[i]; i++)
         palavra[i] = tolower((unsigned char)palavra[i]);
-    }
+
     return palavra;
 }
 
