@@ -48,7 +48,7 @@ void preOrdemE(No* a){
  // --------------------------------------------------------------------------------
  //DIREITA
 
- void posOrdemD(No* a){
+void posOrdemD(No* a){
   if (a!= NULL){
       posOrdemD(a->dir);
       posOrdemD(a->esq);
@@ -71,6 +71,135 @@ void preOrdemD(No* a){
       preOrdemD(a->esq);
   }
 }
+// --------------------------------------------------------------------------------
+
+
+// conta quantas palavras existem
+int contaPalavras(No* a){
+    if(a == NULL){
+        return 0;
+    }
+    // nó atual + da esquerda + da direita
+    return 1 + contaPalavras(a->esq) + contaPalavras(a->dir);
+}
+
+// percorre a arvore e soma o total de palavras
+int contaTotalPalavras(No* arvore[26]){
+    int total = 0, i;
+    for(i=0; i<26; i++){
+        // cada letra
+        total += contaPalavras(arvore[i]);
+    }
+    return total;
+}
+
+////////////////////////////////
+
+// soma quantas vezes cada palavra aparece
+int contaOcorrencias(No* a){
+    if(a == NULL){
+        return 0;
+    }
+    // nó atual + da esquerda + da direita
+    return a->repeticoes + contaOcorrencias(a->esq) + contaOcorrencias(a->dir);
+}
+
+// percorre a arvore e soma cada ocorrencia de palavra
+int contaTotalOcorrencias(No* arvore[26]){
+    int total = 0, i;
+    for(i=0; i<26; i++){
+        // cada letra
+        total += contaOcorrencias(arvore[i]);
+    }
+    return total;
+}
+
+////////////////////////////////
+
+// encontra palavras com maior numero de ocorrencias
+void buscaMaiorOcorrencia(No* a, int* maior, char palavras[][20], int* count){
+    if(a == NULL){
+        return;
+    }
+
+    buscaMaiorOcorrencia(a->esq, maior, palavras, count);  // filho esquerdo
+
+    if(a->repeticoes > *maior){
+        // encontrou, zera e começa dnv
+        *maior = a->repeticoes;
+        *count = 0;
+        strcpy(palavras[*count], a->palavra);
+        (*count)++;
+    }else if(a->repeticoes == *maior){
+        // mesma ocorrencia, adiciona palavra a lista
+        strcpy(palavras[*count], a->palavra);
+        (*count)++;
+    }
+
+    buscaMaiorOcorrencia(a->dir, maior, palavras, count);  // filho direito
+}
+
+
+// percorre e imprime as palavras com maior numero de ocorrencias
+void maiorOcorrencia(No* arvore[26]){
+    int maior = 0, count = 0, i;  // maior qtd de repeticoes - count de palavras
+    char palavras[100][20];  // limite de 100 palavras
+
+    for(i=0; i<26; i++){
+        buscaMaiorOcorrencia(arvore[i], &maior, palavras, &count);
+    }
+
+    if(maior == 0){
+        printf("\nNenhuma palavra encontrada.\n");
+        return;
+    }
+
+    printf("\nMaior numero de ocorrencias: %d\n", maior);
+    printf("Palavra(s): ");
+    for(i=0; i<count; i++){
+        printf("%s ", palavras[i]);
+    }
+    printf("\n");
+}
+
+////////////////////////////////
+
+// percorre e imprime 1 ocorrencia
+void exibeUmaOcorrencia(No* a){
+    if(a == NULL){
+        return;
+    }
+
+    exibeUmaOcorrencia(a->esq);  // filho esquerdo
+
+    if(a->repeticoes == 1){
+        // se aparece uma vez, imprime
+        printf("%s ", a->palavra);
+    
+    }
+
+    exibeUmaOcorrencia(a->dir);  // filho direito
+}
+
+
+// percorre a arvore e imprime 1 ocorrencia
+void umaOcorrencia(No* arvore[26]){
+    int encontrou = 0, i;
+    printf("\nPalavras com apenas uma ocorrencia:\n");
+
+    for(i=0; i<26; i++){
+        if(arvore[i] != NULL){
+            exibeUmaOcorrencia(arvore[i]);
+            encontrou = 1;
+        }
+    }
+
+    if(!encontrou){
+        printf("Nenhuma palavra com uma ocorrencia encontrada.\n");
+    }
+
+}
+
 // --------------------------------------------------------------------------------
 
 No* insereFolha(No* arvore, char palavra[20]) {
@@ -182,6 +311,43 @@ void exibePalavra(No* arvore) {
 // --------------------------------------------------------------------------------
 //MENUS
 
+void menuOcorrencia(No* arvore[26], int opcao){
+
+    switch(opcao){
+        case 1:
+            printf("\n--------------------------------");
+            maiorOcorrencia(arvore);
+            printf("--------------------------------");
+            break;
+        case 2:
+            printf("\n-------------------------");
+            umaOcorrencia(arvore);
+            printf("\n-------------------------");
+            break;
+    }
+
+}
+
+void menuContagem(No* arvore[26], int opcao){
+    int resultado;
+
+    switch(opcao){
+        case 1:
+            resultado = contaTotalPalavras(arvore);
+            printf("\n--------------------------------");
+            printf("\nTotal de palavras distintas: %d\n", resultado);
+            printf("--------------------------------");
+            break;
+        case 2:
+            resultado = contaTotalOcorrencias(arvore);
+            printf("\n-------------------------");
+            printf("\nTotal de ocorrencias: %d\n", resultado);
+            printf("-------------------------");
+            break;
+    }
+
+}
+
 void menuOrd(No* arvore[26], int opcao) {
     int ordem;
     char letra;
@@ -266,12 +432,12 @@ void menu(No* arvore[26]) {
         printf("1. Insere folha\n");
         printf("2. Remove folha\n");
         printf("3. Pesquisa folha\n");
-        printf("4. Conta total de palavras //implementar\n"); //TODO: implementar
-        printf("5. Conta total de ocorrencias //implementar\n"); //TODO: implementar
+        printf("4. Conta total de palavras\n"); // retorna o numero total de palavras (distintas); 
+        printf("5. Conta total de ocorrencias\n"); // retorna o numero total de ocorrencias de palavras (repetidas tb);
         printf("6. Exibe lista de palavras\n");
         printf("7. Exibe lista de palavras por letra\n");
-        printf("8. Exibe maior ocorrencia //implementar\n"); //TODO: implementar
-        printf("9. Exibe uma ocorrencia //implementar\n"); //TODO: implementar
+        printf("8. Exibe maior ocorrencia\n"); // retorna as palavras com maior numero de ocorrencias
+        printf("9. Exibe uma ocorrencia\n"); // retorna as paalvras que so tem uma ocorrencia
         printf("0. Sair\n");
         printf("Escolha uma opcao: ");
         scanf("%d", &opcao);
@@ -287,10 +453,10 @@ void menu(No* arvore[26]) {
                 menuCRUD(arvore, 3);
                 break;
             case 4:
-                printf("\nFuncionalidade ainda nao implementada.\n");
+                menuContagem(arvore, 1);
                 break;
             case 5:
-                printf("\nFuncionalidade ainda nao implementada.\n");
+                menuContagem(arvore, 2);
                 break;
             case 6:
                 menuOrd(arvore, 1);
@@ -299,10 +465,10 @@ void menu(No* arvore[26]) {
                 menuOrd(arvore, 2);
                 break;
             case 8:
-                printf("\nFuncionalidade ainda nao implementada.\n");
+                menuOcorrencia(arvore, 1);
                 break;
             case 9:
-                printf("\nFuncionalidade ainda nao implementada.\n");
+                menuOcorrencia(arvore, 2);
                 break;
             case 0:
                 exit(0);
