@@ -548,10 +548,10 @@ void dBinsert(No* arvore[26]) {
    char palavra[20];
    int index;
 
-   file = fopen("..\\input.txt", "r");
+   file = fopen("..\\input2.txt", "r");
    if(!file) {
       printf("Erro ao abrir o arquivo!\n");
-      exit(1);
+      return;
    }
 
    fseek(file, 0, SEEK_SET);
