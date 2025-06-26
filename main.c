@@ -34,13 +34,13 @@ No* rotacaoDireita(No* arvore) {
     return aux;
 }
 No* rotacaoDuplaEsquerda(No* arvore) {
-    rotacaoDireita(arvore->dir);
-    rotacaoEsquerda(arvore);
+    arvore->dir = rotacaoDireita(arvore->dir);
+    arvore = rotacaoEsquerda(arvore);
     return arvore;
 }
 No* rotacaoDuplaDireita(No* arvore) {
-    rotacaoEsquerda(arvore->esq);
-    rotacaoDireita(arvore);
+    arvore->esq = rotacaoEsquerda(arvore->esq);
+    arvore =  rotacaoDireita(arvore);
     return arvore;
 }
 
@@ -130,20 +130,19 @@ void preOrdemD(No* a){
 
 
 // conta quantas palavras existem
-int contaPalavras(No* a){
-    if(a == NULL){
+int contaPalavrasDistintas(No* a) {
+    if (a == NULL)
         return 0;
-    }
-    // nó atual + da esquerda + da direita
-    return 1 + contaPalavras(a->esq) + contaPalavras(a->dir);
+
+    return 1 + contaPalavrasDistintas(a->esq) + contaPalavrasDistintas(a->dir);
 }
 
 // percorre a arvore e soma o total de palavras
 int contaTotalPalavras(No* arvore[26]){
     int total = 0, i;
     for(i=0; i<26; i++){
-        // cada letra
-        total += contaPalavras(arvore[i]);
+        total += contaPalavrasDistintas(arvore[i]);
+        printf("Total: %d\n", total);
     }
     return total;
 }
@@ -163,7 +162,6 @@ int contaOcorrencias(No* a){
 int contaTotalOcorrencias(No* arvore[26]){
     int total = 0, i;
     for(i=0; i<26; i++){
-        // cada letra
         total += contaOcorrencias(arvore[i]);
     }
     return total;
