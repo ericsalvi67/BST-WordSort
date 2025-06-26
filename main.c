@@ -142,7 +142,6 @@ int contaTotalPalavras(No* arvore[26]){
     int total = 0, i;
     for(i=0; i<26; i++){
         total += contaPalavrasDistintas(arvore[i]);
-        printf("Total: %d\n", total);
     }
     return total;
 }
